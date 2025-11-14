@@ -6,3 +6,4 @@ python-dotenv
 google-cloud-pubsub
 google-cloud-secret-manager
 requests
+google-cloud-pubsub[async]
