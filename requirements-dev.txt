@@ -1,0 +1,6 @@
+# Development and Testing Dependencies
+-r requirements.txt
+pytest
+black
+flake8
+requests

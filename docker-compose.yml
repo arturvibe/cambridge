@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  ingestor:
+    build:
+      context: .
+      dockerfile: Dockerfile.ingestor
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+    environment:
+      - PYTHONUNBUFFERED=1
+  processor:
+    build:
+      context: .
+      dockerfile: Dockerfile.processor
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./src:/app/src
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - GOOGLE_CLOUD_PROJECT=local-project
+    depends_on:
+      - pubsub-emulator
+
+  processor:
+    build:
+      context: .
+      dockerfile: Dockerfile.processor
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./src:/app/src
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - GOOGLE_CLOUD_PROJECT=local-project
+    depends_on:
+      - pubsub-emulator
+
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    command: gcloud beta emulators pubsub start --project=local-project --host-port=0.0.0.0:8085
+    ports:
+      - "8085:8085"

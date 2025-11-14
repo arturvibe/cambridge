@@ -1,0 +1,8 @@
+# Application Dependencies
+fastapi
+uvicorn
+pydantic
+python-dotenv
+google-cloud-pubsub
+google-cloud-secret-manager
+requests

@@ -1,0 +1,9 @@
+[flake8]
+# Ignore some benign errors
+ignore = E203, E266, E501, W503
+# Max line length
+max-line-length = 88
+# Max complexity
+max-complexity = 18
+# Select errors to report on
+select = B,C,E,F,W,T4,B9
