@@ -1,24 +1,51 @@
-# Use an official Python runtime as a parent image
-FROM python:3.12-slim
+# Stage 1: Builder
+# Create a virtual environment and install packages into it.
+FROM python:3.12-slim as builder
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy the requirements file into the container at /app
+# Create and activate a virtual environment
+# This is a key change: we control the location of our packages.
+RUN python -m venv /venv
+ENV PATH="/venv/bin:$PATH"
+
+# Install dependencies into the virtual environment
 COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Stage 2: Final Image
+# Use a "distroless" image for minimal size and maximum security.
+# This image is based on Debian 12, just like python:3.12-slim.
+FROM gcr.io/distroless/python3-debian12
 
-# Copy the application code into the container at /app
-# We copy the entire src directory to make the cambridge package available
-COPY src/ /app/src/
+# Define the non-root user's UID/GID provided by the distroless image
+ENV NONROOT_UID=65532
+ENV NONROOT_GID=65532
 
-# Make port 8081 available to the world outside this container
+# Set working directory
+WORKDIR /app
+
+# Copy the virtual environment from the builder,
+# and set the owner to the non-root user using the --chown flag.
+COPY --from=builder --chown=$NONROOT_UID:$NONROOT_GID /venv /venv
+
+# Copy application code from the build context, setting the owner
+COPY --chown=$NONROOT_UID:$NONROOT_GID src/processor/ src/processor/
+COPY --chown=$NONROOT_UID:$NONROOT_GID src/cambridge/ src/cambridge/
+
+# Set environment variables
+# 1. Add the venv to the PATH
+# 2. Add the app's root to the PYTHONPATH
+ENV PATH="/venv/bin:$PATH" \
+    PYTHONPATH="/app"
+
+# Expose port
 EXPOSE 8081
 
-# Define environment variable to ensure src is in the python path
-ENV PYTHONPATH /app
+# Switch to the non-root user
+USER $NONROOT_UID
 
 # Run the application
 CMD ["uvicorn", "src.processor.main:app", "--host", "0.0.0.0", "--port", "8081"]
