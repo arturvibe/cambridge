@@ -50,6 +50,8 @@ terraform plan -var="project_id=your-gcp-project-id"
 terraform apply -var="project_id=your-gcp-project-id"
 ```
 
+After a successful deployment, the URL of the Cloud Run service will be displayed as an output.
+
 ### 4. Continuous Deployment
 
 This project is configured with a GitHub Actions workflow that will automatically build and deploy the application to Google Cloud Run whenever you push to the `main` branch.

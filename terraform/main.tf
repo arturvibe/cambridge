@@ -51,3 +51,8 @@ resource "google_project_iam_member" "run_invoker" {
   role    = "roles/run.invoker"
   member  = "serviceAccount:${google_cloud_run_v2_service.main.service_account}"
 }
+
+output "service_url" {
+  description = "The URL of the deployed Cloud Run service."
+  value       = google_cloud_run_v2_service.main.uri
+}
