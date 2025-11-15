@@ -6,6 +6,8 @@ A FastAPI application to receive and process webhooks from Frame.io, deployed on
 
 This project uses Terraform to manage the infrastructure on Google Cloud Platform. To deploy the application, you will need to have the `gcloud` CLI and Terraform installed and configured.
 
+For instructions on how to install the `gcloud` CLI on macOS, see the [official Google Cloud documentation](https://cloud.google.com/sdk/docs/install#mac).
+
 ### 1. Authenticate with Google Cloud
 
 First, you'll need to authenticate with Google Cloud:
