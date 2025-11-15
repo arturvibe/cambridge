@@ -2,28 +2,6 @@
 
 A FastAPI application to receive and process webhooks from Frame.io, deployed on Google Cloud Run.
 
-## Configuration
-
-To ensure the security of your webhook endpoint, this application verifies the signature of incoming webhooks. You'll need to configure a secret token in both Frame.io and your Google Cloud Run service.
-
-### 1. Generate a Secret Token
-
-You can generate a strong, random secret token using a password manager or the following command:
-
-```bash
-openssl rand -hex 32
-```
-
-### 2. Configure the Frame.io Webhook
-
-When you create your webhook in Frame.io, paste the secret token you generated into the "Secret" field.
-
-### 3. Configure the Google Cloud Run Service
-
-In your Google Cloud Run service, you'll need to set the `FRAMEIO_WEBHOOK_SECRET` environment variable to the same secret token you used in Frame.io.
-
-You can do this when you deploy the service for the first time or by updating the service's configuration.
-
 ## Viewing Logs
 
 To view the logs for your service and see the payloads of incoming webhooks, you can use the Google Cloud Console or the `gcloud` command-line tool.
