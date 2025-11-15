@@ -23,35 +23,36 @@ variable "region" {
   default     = "us-central1"
 }
 
-variable "secret_name" {
-  description = "The name of the secret to create in Secret Manager."
+variable "app_name" {
+  description = "The name of the application."
   type        = string
-  default     = "cambridge-creds"
+  default     = "frameio-webhook-app"
 }
 
-resource "google_pubsub_topic" "ingest" {
-  name = "cambridge-ingest"
+resource "google_artifact_registry_repository" "main" {
+  location      = var.region
+  repository_id = var.app_name
+  format        = "DOCKER"
 }
 
-resource "google_pubsub_topic" "ingest_dlq" {
-  name = "cambridge-ingest-dlq"
-}
+resource "google_cloud_run_v2_service" "main" {
+  name     = var.app_name
+  location = var.region
 
-resource "google_secret_manager_secret" "cambridge_creds" {
-  secret_id = var.secret_name
-
-  replication {
-    automatic = true
+  template {
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/${var.app_name}:latest"
+    }
   }
 }
 
-resource "google_secret_manager_secret_version" "cambridge_creds_initial" {
-  secret = google_secret_manager_secret.cambridge_creds.id
-  secret_data = jsonencode({
-    FRAME_IO_TOKEN"          : "your-frameio-token-here",
-    FRAME_IO_WEBHOOK_SECRET" : "generate-a-random-secret-here",
-    GOOGLE_CLIENT_ID"        : "your-google-client-id.apps.googleusercontent.com",
-    GOOGLE_CLIENT_SECRET"    : "your-google-client-secret",
-    GOOGLE_REFRESH_TOKEN"    : "your-google-refresh-token"
-  })
+resource "google_project_iam_member" "run_invoker" {
+  project = var.project_id
+  role    = "roles/run.invoker"
+  member  = "serviceAccount:${google_cloud_run_v2_service.main.service_account}"
+}
+
+output "service_url" {
+  description = "The URL of the deployed Cloud Run service."
+  value       = google_cloud_run_v2_service.main.uri
 }
