@@ -1,5 +1,5 @@
-# Use an official Python runtime as a parent image
-FROM python:3.12-slim
+# Builder stage
+FROM python:3.12-slim as builder
 
 # Set the working directory in the container
 WORKDIR /app
@@ -10,9 +10,19 @@ COPY requirements.txt .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Final stage
+FROM python:3.12-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the installed packages from the builder stage
+COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
+
 # Copy the application code into the container at /app
-# We copy the entire src directory to make the cambridge package available
-COPY src/ /app/src/
+# We copy only the necessary src directories
+COPY src/processor/ /app/src/processor/
+COPY src/cambridge/ /app/src/cambridge/
 
 # Make port 8081 available to the world outside this container
 EXPOSE 8081
